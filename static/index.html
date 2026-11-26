@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Vaani — Real-time Speech to Text</title>
+  <meta name="description" content="Speak in Hindi, English or both — Vaani transcribes in real time." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+  <script>
+    try { const t = localStorage.getItem("theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  </script>
+</head>
+<body>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="i-mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" x2="12" y1="19" y2="22"/></symbol>
+    <symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
+    <symbol id="i-save" viewBox="0 0 24 24"><path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/></symbol>
+    <symbol id="i-copy" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M21.2 6.8a1 1 0 0 0 0-1.4l-2.6-2.6a1 1 0 0 0-1.4 0L4 16v4h4Z"/><path d="m15 5 4 4"/></symbol>
+    <symbol id="i-volume" viewBox="0 0 24 24"><path d="M11 4.7a.7.7 0 0 0-1.2-.5L6.4 7.6A1.4 1.4 0 0 1 5.4 8H3a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2.4a1.4 1.4 0 0 1 1 .4l3.4 3.4a.7.7 0 0 0 1.2-.5Z"/><path d="M16 9a5 5 0 0 1 0 6"/><path d="M19.4 18.4a9 9 0 0 0 0-12.8"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></symbol>
+    <symbol id="i-x" viewBox="0 0 24 24"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></symbol>
+    <symbol id="i-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/></symbol>
+    <symbol id="i-moon" viewBox="0 0 24 24"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></symbol>
+    <symbol id="i-file" viewBox="0 0 24 24"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M10 13H8M16 17H8M16 13h-2"/></symbol>
+  </svg>
+
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span><span></span></span>
+      <span class="brand-name">Vaani</span>
+      <span class="brand-tag">Speech to Text</span>
+    </div>
+    <div class="topbar-right">
+      <span class="status-pill" id="engineStatus"><span class="dot"></span><span class="label">Checking…</span></span>
+      <button class="icon-btn" id="themeToggle" aria-label="Toggle colour theme">
+        <svg class="ic ic-sun"><use href="#i-sun"/></svg>
+        <svg class="ic ic-moon"><use href="#i-moon"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <!-- ===== Studio ===== -->
+    <section class="card studio" aria-labelledby="studioTitle">
+      <div class="card-head">
+        <div>
+          <h1 id="studioTitle">Live studio</h1>
+          <p class="sub">Speak in Hindi, English, or mix both — words appear as you talk.</p>
+        </div>
+        <div class="controls">
+          <label class="field-inline">
+            <span>Language</span>
+            <select id="language">
+              <option value="auto">Auto-detect (Hinglish)</option>
+              <option value="hi-IN,en-IN">Hindi + English</option>
+              <option value="en-IN">English (India)</option>
+              <option value="hi-IN">Hindi</option>
+              <option value="ta-IN">Tamil</option>
+            </select>
+          </label>
+          <label class="field-inline">
+            <span>Engine</span>
+            <select id="engine">
+              <option value="gemini-live">Gemini Live</option>
+              <option value="browser">Browser (fallback)</option>
+            </select>
+          </label>
+        </div>
+      </div>
+
+      <div class="recorder">
+        <button class="mic-btn" id="micBtn" aria-label="Start recording" aria-pressed="false">
+          <span class="ring" aria-hidden="true"></span>
+          <svg class="ic ic-mic"><use href="#i-mic"/></svg>
+          <svg class="ic ic-stop"><use href="#i-stop"/></svg>
+        </button>
+        <div class="recorder-meta">
+          <div class="timer" id="timer" aria-live="off">00:00</div>
+          <div class="rec-state" id="recState">Tap the mic to start</div>
+        </div>
+        <canvas id="wave" class="wave" aria-hidden="true"></canvas>
+      </div>
+
+      <div class="transcript" id="transcript" aria-live="polite" tabindex="0">
+        <p class="placeholder" id="placeholder">Your transcript will appear here. Try: <em>“Aaj ka meeting schedule kya hai, can you remind me at 5 PM?”</em></p>
+        <span id="finalText"></span><span id="interimText" class="interim"></span>
+      </div>
+
+      <div class="studio-foot">
+        <span class="meta" id="liveMeta">0 words</span>
+        <div class="actions">
+          <button class="btn ghost" id="listenBtn" disabled><svg class="ic"><use href="#i-volume"/></svg>Listen</button>
+          <button class="btn ghost" id="copyBtn" disabled><svg class="ic"><use href="#i-copy"/></svg>Copy</button>
+          <button class="btn ghost" id="clearBtn" disabled><svg class="ic"><use href="#i-x"/></svg>Clear</button>
+          <button class="btn primary" id="saveBtn" disabled><svg class="ic"><use href="#i-save"/></svg>Save</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== History dashboard ===== -->
+    <section class="card history" aria-labelledby="historyTitle">
+      <div class="card-head">
+        <div>
+          <h2 id="historyTitle">History</h2>
+          <p class="sub">Every saved transcription, stored in PostgreSQL.</p>
+        </div>
+      </div>
+
+      <div class="stats">
+        <div class="stat"><span class="stat-num" id="statTotal">0</span><span class="stat-label">Transcripts</span></div>
+        <div class="stat"><span class="stat-num" id="statWords">0</span><span class="stat-label">Words</span></div>
+        <div class="stat"><span class="stat-num" id="statMinutes">0</span><span class="stat-label">Minutes</span></div>
+      </div>
+
+      <label class="search">
+        <svg class="ic"><use href="#i-search"/></svg>
+        <span class="sr-only">Search transcriptions</span>
+        <input type="search" id="search" placeholder="Search title or text…" autocomplete="off" />
+      </label>
+
+      <ul class="list" id="list" aria-live="polite"></ul>
+      <div class="empty" id="empty" hidden>
+        <svg class="ic ic-lg"><use href="#i-file"/></svg>
+        <p class="empty-title">No transcriptions yet</p>
+        <p class="sub">Record something and hit <strong>Save</strong> — it’ll show up here.</p>
+      </div>
+      <button class="btn ghost full" id="loadMore" hidden>Load more</button>
+    </section>
+  </main>
+
+  <!-- Edit dialog -->
+  <dialog id="editDialog" class="dialog" aria-labelledby="editTitle">
+    <form method="dialog" id="editForm">
+      <div class="dialog-head">
+        <h3 id="editTitle">Edit transcription</h3>
+        <button type="button" class="icon-btn" data-close aria-label="Close"><svg class="ic"><use href="#i-x"/></svg></button>
+      </div>
+      <label class="field">
+        <span>Title</span>
+        <input id="editTitleInput" required maxlength="200" />
+      </label>
+      <label class="field">
+        <span>Text</span>
+        <textarea id="editTextInput" rows="8" required></textarea>
+      </label>
+      <p class="field-error" id="editError" role="alert"></p>
+      <div class="dialog-foot">
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+        <button type="submit" class="btn primary" value="save">Save changes</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- Delete dialog -->
+  <dialog id="deleteDialog" class="dialog dialog-sm" aria-labelledby="deleteTitle">
+    <form method="dialog">
+      <h3 id="deleteTitle">Delete this transcription?</h3>
+      <p class="sub" id="deleteName"></p>
+      <div class="dialog-foot">
+        <button type="button" class="btn ghost" data-close>Cancel</button>
+        <button type="submit" class="btn danger" value="delete" id="confirmDelete">Delete</button>
+      </div>
+    </form>
+  </dialog>
+
+  <div class="toasts" id="toasts" role="status" aria-live="polite"></div>
+
+  <script src="/static/app.js" type="module"></script>
+</body>
+</html>
